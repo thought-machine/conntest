@@ -1,0 +1,68 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: conntest
+  labels:
+    app: conntest
+    project: cloud
+spec:
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: conntest
+      project: cloud
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9990"
+        prometheus.io/path: "/metrics"
+      labels:
+        app: conntest
+        project: cloud
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - conntest
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: conntest-alpine
+          image: //conntest:conntest_alpine
+          args:
+            - "--dst_hst=conntest:8080"
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            requests:
+              memory: 8Mi
+              cpu: 5m
+            limits:
+              memory: 128Mi
+              cpu: 200m
+          ports:
+            - containerPort: 8080
+              name: tcp
+          readinessProbe:
+            tcpSocket:
+              port: tcp
+            initialDelaySeconds: 2
+            periodSeconds: 20
+          livenessProbe:
+            tcpSocket:
+              port: tcp
+            initialDelaySeconds: 10
+            periodSeconds: 30
+      securityContext:
+        runAsUser: 1000
