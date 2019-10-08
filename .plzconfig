@@ -5,20 +5,21 @@
 ;
 ; Or you can uncomment the following to pin everyone to a particular version;
 ; when you change it all users will automatically get updated.
-; [please]
-; version = 14.1.5
+[please]
+version = 14.1.5
 
 [buildconfig]
 default-docker-repo = hub.docker.com
 
 
 [test]
-sandbox = true
+; Since building and testing in docker
+sandbox = false
 
 
 [go]
-gopath = $TMP_DIR:$TMP_DIR/third_party/go
 importpath = github.com/thought-machine/conntest
+DefaultStatic = true
 
 
 [licences]

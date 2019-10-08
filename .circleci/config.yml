@@ -1,0 +1,11 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/ for more details
+version: 2
+jobs:
+  build:
+    working_directory: ~/conntest
+    machine: true
+    steps:
+      - checkout
+      - run: docker build -f Dockerfile-builder . --rm=false

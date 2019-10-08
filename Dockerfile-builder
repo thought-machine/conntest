@@ -1,0 +1,35 @@
+FROM golang:1.13.1-stretch AS builder
+
+# RUN apt-get update && \
+#     apt-get install -y python3 python3-dev python3-pip openjdk-8-jdk-headless \
+#     curl unzip git locales pkg-config zlib1g-dev && \
+#     apt-get clean
+
+RUN ln -s /usr/local/go/bin/go /usr/local/bin/go
+
+RUN curl https://get.please.build | bash
+
+
+WORKDIR /go/github.com/thought-machine/conntest
+
+COPY . .
+
+RUN . ~/.profile && plz test //... --show_all_output
+
+RUN . ~/.profile && plz build //:conntest --show_all_output
+
+
+FROM alpine@sha256:72c42ed48c3a2db31b7dafe17d275b634664a708d901ec9fd57b1529280f01fb
+
+COPY --from=builder /go/github.com/thought-machine/conntest/plz-out/bin/conntest /home/app/conntest
+
+# Max user
+RUN addgroup -g 255999 -S app && \
+    adduser -u 255999 -S app -G app
+
+RUN chmod +x /home/app/conntest
+
+USER 255999
+
+ENTRYPOINT ["/home/app/conntest"]
+
