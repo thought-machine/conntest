@@ -6,7 +6,7 @@
 ; Or you can uncomment the following to pin everyone to a particular version;
 ; when you change it all users will automatically get updated.
 [please]
-version = 14.1.5
+version = 14.1.7
 
 [buildconfig]
 default-docker-repo = hub.docker.com
@@ -19,7 +19,8 @@ sandbox = false
 
 [go]
 importpath = github.com/thought-machine/conntest
-DefaultStatic = true
+DefaultStatic = false
+CgoCCTool = /usr/local/musl/bin/musl-gcc
 
 
 [licences]

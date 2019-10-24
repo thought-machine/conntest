@@ -281,7 +281,8 @@ func ReceiveViaProtocol(c net.Conn) (string, error) {
 	log.Debug("Server received: ", netData)
 
 	if (err != nil) && (err != io.EOF) {
-		log.Error(err)
+		// Down to debug level as we don't care whether the client stops sending
+		log.Debug(err)
 		return "", err
 	}
 

@@ -1,25 +1,26 @@
-FROM golang:1.13.1-stretch AS builder
-
-# RUN apt-get update && \
-#     apt-get install -y python3 python3-dev python3-pip openjdk-8-jdk-headless \
-#     curl unzip git locales pkg-config zlib1g-dev && \
-#     apt-get clean
+# golang:1.13.1-alpine3.10
+FROM golang@sha256:2293e952c79b8b3a987e1e09d48b6aa403d703cef9a8fa316d30ba2918d37367 as builder
 
 RUN ln -s /usr/local/go/bin/go /usr/local/bin/go
 
-RUN curl https://get.please.build | bash
+RUN apk add --no-cache curl wget gcc make bash git musl-dev
 
+RUN touch /root/.profile
+
+RUN curl https://get.please.build | sh
+
+RUN mkdir /lib64 && ln -s /lib/ld-musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 
 WORKDIR /go/github.com/thought-machine/conntest
 
 COPY . .
 
-RUN . ~/.profile && plz test //... --show_all_output
+RUN source ~/.profile && plz test //... --show_all_output
 
-RUN . ~/.profile && plz build //:conntest --show_all_output
+RUN source ~/.profile && plz build //:conntest --show_all_output
 
-
-FROM alpine@sha256:72c42ed48c3a2db31b7dafe17d275b634664a708d901ec9fd57b1529280f01fb
+# alpine:3.10.3
+FROM alpine@sha256:c19173c5ada610a5989151111163d28a67368362762534d8a8121ce95cf2bd5a
 
 COPY --from=builder /go/github.com/thought-machine/conntest/plz-out/bin/conntest /home/app/conntest
 
@@ -29,7 +30,6 @@ RUN addgroup -g 255999 -S app && \
 
 RUN chmod +x /home/app/conntest
 
-USER 255999
+USER app
 
 ENTRYPOINT ["/home/app/conntest"]
-

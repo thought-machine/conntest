@@ -1,5 +1,7 @@
 package(default_visibility = ["PUBLIC"])
 
+subinclude("///third_party/subrepos/pleasings//remote")
+
 go_get(
     name = "x_crypto",
     get = "golang.org/x/crypto/...",
@@ -74,6 +76,11 @@ go_get(
     ],
 )
 
+git_repo(
+    name = "tcpinfo-repo",
+    repo = "https://github.com/brucespang/go-tcpinfo",
+    revision = "e6cc7410d081080ec38065c00bb3b72f3b144913",
+)
 go_get(
     name = "tcpinfo",
     get = "github.com/brucespang/go-tcpinfo",

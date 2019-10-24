@@ -6,7 +6,7 @@ subinclude("///third_party/subrepos/pleasings//k8s")
 go_binary(
     name = "conntest",
     srcs = ["main.go"],
-    static = True,
+    static = False,
     deps = [
         "//src/srvendpoints:srvendpoints",
         "//src/tcpconn:tcpconn",
