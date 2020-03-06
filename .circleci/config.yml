@@ -35,4 +35,7 @@ workflows:
               only: master
   test-buildable:
     jobs:
-      - build_and_test
+      - build_and_test:
+          filters:
+            branches:
+              ignore: master
