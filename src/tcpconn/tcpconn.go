@@ -170,7 +170,7 @@ func DealWithTCPConnections(s net.Listener) error {
 	for {
 		c, err := s.Accept()
 		if err != nil {
-			log.Error("Error accepting connection: ", err)
+			log.Debug("Error accepting connection: ", err)
 			return err
 		}
 		go HandleTCPConnection(c)
@@ -178,7 +178,7 @@ func DealWithTCPConnections(s net.Listener) error {
 }
 
 // SendTCPConnection sends bytesToSend bytes to destHost
-func SendTCPConnection(destHost string, bytesToSend int) error {
+func SendTCPConnection(destHost string, bytesToSend int, nodeName string) error {
 	c, err := net.Dial("tcp", destHost)
 	if err != nil {
 		return err
@@ -214,15 +214,6 @@ func SendTCPConnection(destHost string, bytesToSend int) error {
 	}
 	localIPsStr := localIPsBuilder.String()
 	log.Debug("Discovered IPs: ", localIPsStr)
-
-	// Look up node name
-	nodeName, foundBool := os.LookupEnv("NODE_NAME")
-	if foundBool == false {
-		nodeName = "UNKNOWN"
-		log.Warning("No node name was discovered!")
-	} else {
-		log.Debug("Discovered node name: ", nodeName)
-	}
 
 	// Register relevant socket info
 	RetransmitsCounterVec.WithLabelValues(destHost, localIPsStr, nodeName).Add(float64(socketInfo.Retransmits))
@@ -318,7 +309,7 @@ func ReceiveViaProtocol(c net.Conn) (string, error) {
 // with specified time intervals plus a random amount up to a second
 // Time interval counted in seconds
 // **Functionality duplicated and improved in conntools, no longer in used in main**
-func SendTCPConnections(destHost string, timeBetweenTestsS float64, bytesToSend int, timesToSend int, randSecs float64) error {
+func SendTCPConnections(destHost string, nodeName string, timeBetweenTestsS float64, bytesToSend int, timesToSend int, randSecs float64) error {
 	var terr error
 
 	runForever := false
@@ -329,7 +320,7 @@ func SendTCPConnections(destHost string, timeBetweenTestsS float64, bytesToSend 
 
 	for {
 		log.Debug("Sending TCP test to ", destHost, "\n")
-		err := SendTCPConnection(destHost, bytesToSend)
+		err := SendTCPConnection(destHost, bytesToSend, nodeName)
 		if (err != nil) && (err != io.EOF) {
 			log.Error(err)
 			// We return the last error encountered

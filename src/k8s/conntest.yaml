@@ -46,7 +46,7 @@ spec:
                   fieldPath: spec.nodeName
           resources:
             requests:
-              memory: 8Mi
+              memory: 16Mi
               cpu: 5m
             limits:
               memory: 128Mi
@@ -65,4 +65,4 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 30
       securityContext:
-        runAsUser: 1000
+        runAsUser: 255999

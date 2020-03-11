@@ -56,8 +56,8 @@ func DiscoverEndpoints(service, protocol, name string, retryIntervalSecs float64
 }
 
 // makethConnection is a supporting function for stacking up many concurrent connections using goroutines
-func makethConnection(ch chan bool, endpoint string, TestBytes int) {
-	err := tcpconn.SendTCPConnection(endpoint, TestBytes)
+func makethConnection(ch chan bool, endpoint string, nodeName string, testBytes int) {
+	err := tcpconn.SendTCPConnection(endpoint, testBytes, nodeName)
 	if err != nil && strings.TrimSpace(err.Error()) != "EOF" {
 		log.Error(err)
 	}
@@ -66,7 +66,7 @@ func makethConnection(ch chan bool, endpoint string, TestBytes int) {
 }
 
 // SendConcTCPConnections sends packets using concurrent sequential connections
-func SendConcTCPConnections(service string, protocol string, name string, TestBytes int, retryIntervalSecs float64, maxRetries int) error {
+func SendConcTCPConnections(service string, protocol string, name string, nodeName string, testBytes int, retryIntervalSecs float64, maxRetries int) error {
 	ch := make(chan bool)
 	defer close(ch)
 	defer log.Debug("Channel closed")
@@ -75,7 +75,7 @@ func SendConcTCPConnections(service string, protocol string, name string, TestBy
 		return err
 	}
 	for i := 0; i < len(endpoints); i++ {
-		go makethConnection(ch, endpoints[i], TestBytes)
+		go makethConnection(ch, endpoints[i], nodeName, testBytes)
 	}
 	// blocks further execution until connections to all endpoints are completed
 	for i := 0; i < len(endpoints); i++ {

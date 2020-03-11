@@ -11,7 +11,7 @@ import (
 // TestOnceSmallPacketOneConn sends one small packet using one connection
 func TestOnceSmallPacketOneConn(t *testing.T) {
 	addr := "0.0.0.0:9999"
-	s, err := net.Listen("tcp4", addr)
+	s, err := net.Listen("tcp", addr)
 
 	assert.Nil(t, err)
 	defer s.Close()
@@ -20,10 +20,11 @@ func TestOnceSmallPacketOneConn(t *testing.T) {
 	bytesToSend := 1
 	timesToSend := 1
 	maxRandTime := 0.001
+	nodeName := "TestOnceSmallPacketOneConn"
 
 	// Means that we can stack up multiple servers/clients
 	go DealWithTCPConnections(s)
-	err = SendTCPConnections(addr, timeBetSend, bytesToSend, timesToSend, maxRandTime)
+	err = SendTCPConnections(addr, nodeName, timeBetSend, bytesToSend, timesToSend, maxRandTime)
 	assert.Nil(t, err)
 }
 
@@ -31,7 +32,7 @@ func TestOnceSmallPacketOneConn(t *testing.T) {
 // Note that the port used each time may be different
 func TestMultiSmallPacketsSeqConn(t *testing.T) {
 	addr := "0.0.0.0:9998"
-	s, err := net.Listen("tcp4", addr)
+	s, err := net.Listen("tcp", addr)
 
 	assert.Nil(t, err)
 	defer s.Close()
@@ -40,16 +41,17 @@ func TestMultiSmallPacketsSeqConn(t *testing.T) {
 	bytesToSend := 8
 	timesToSend := 100
 	maxRandTime := 0.0001
+	nodeName := "TestMultiSmallPacketsSeqConn"
 
 	go DealWithTCPConnections(s)
-	err = SendTCPConnections(addr, timeBetSend, bytesToSend, timesToSend, maxRandTime)
+	err = SendTCPConnections(addr, nodeName, timeBetSend, bytesToSend, timesToSend, maxRandTime)
 	assert.Nil(t, err)
 }
 
 // makeConnection is a supporting function for stacking up many concurrent connections using goroutines
-func makeConnection(t *testing.T, ch chan bool, addr string, timeBetSend float64, bytesToSend int, timesToSend int, maxRandTime float64) {
+func makeConnection(t *testing.T, ch chan bool, addr string, nodeName string, timeBetSend float64, bytesToSend int, timesToSend int, maxRandTime float64) {
 	var err error
-	err = SendTCPConnections(addr, timeBetSend, bytesToSend, timesToSend, maxRandTime)
+	err = SendTCPConnections(addr, nodeName, timeBetSend, bytesToSend, timesToSend, maxRandTime)
 	assert.Nil(t, err)
 	ch <- true
 }
@@ -59,7 +61,7 @@ func makeConnection(t *testing.T, ch chan bool, addr string, timeBetSend float64
 // Depending on the local environment, the test may fail if there are too many sockets being used at the same time
 func TestMultiSmallPacketsConcConn(t *testing.T) {
 	addr := "0.0.0.0:9997"
-	s, err := net.Listen("tcp4", addr)
+	s, err := net.Listen("tcp", addr)
 
 	assert.Nil(t, err)
 	defer s.Close()
@@ -69,13 +71,14 @@ func TestMultiSmallPacketsConcConn(t *testing.T) {
 	timesToSend := 5
 	maxRandTime := 0.01
 	numConnections := 20
+	nodeName := "TestMultiSmallPacketsConcConn"
 
 	go DealWithTCPConnections(s)
 
 	ch := make(chan bool)
 	defer close(ch)
 	for i := 0; i < numConnections; i++ {
-		go makeConnection(t, ch, addr, timeBetSend, bytesToSend, timesToSend, maxRandTime)
+		go makeConnection(t, ch, addr, nodeName, timeBetSend, bytesToSend, timesToSend, maxRandTime)
 	}
 
 	// 	Blocks execution of defer statements until all goroutines are processed
@@ -91,7 +94,7 @@ func TestMultiSmallPacketsConcConn(t *testing.T) {
 // **Cumulative connections toned down to 500 while investigating a minor connection issue**
 func TestCumulativeConnections(t *testing.T) {
 	addr := "0.0.0.0:9996"
-	s, err := net.Listen("tcp4", addr)
+	s, err := net.Listen("tcp", addr)
 
 	assert.Nil(t, err)
 	defer s.Close()
@@ -102,6 +105,7 @@ func TestCumulativeConnections(t *testing.T) {
 	maxRandTime := 0.0005
 	numSimuConn := 10 //number of simultaneous connections
 	numDesiredConn := 500
+	nodeName := "TestCumulativeConnections"
 
 	numLoops := (numDesiredConn / (numSimuConn * timesToSend)) + 1
 
@@ -111,7 +115,7 @@ func TestCumulativeConnections(t *testing.T) {
 		ch := make(chan bool)
 		defer close(ch)
 		for i := 0; i < numSimuConn; i++ {
-			go makeConnection(t, ch, addr, timeBetSend, bytesToSend, timesToSend, maxRandTime)
+			go makeConnection(t, ch, addr, nodeName, timeBetSend, bytesToSend, timesToSend, maxRandTime)
 		}
 
 		for i := 0; i < numSimuConn; i++ {
@@ -123,7 +127,7 @@ func TestCumulativeConnections(t *testing.T) {
 // TestMultiLargePacketsSeqConn sends many very large packets using one connection at a time
 func TestMultiLargePacketsSeqConn(t *testing.T) {
 	addr := "0.0.0.0:9995"
-	s, err := net.Listen("tcp4", addr)
+	s, err := net.Listen("tcp", addr)
 
 	assert.Nil(t, err)
 	defer s.Close()
@@ -132,9 +136,10 @@ func TestMultiLargePacketsSeqConn(t *testing.T) {
 	bytesToSend := 100000000
 	timesToSend := 20
 	maxRandTime := 0.001
+	nodeName := "TestMultiLargePacketsSeqConn"
 
 	go DealWithTCPConnections(s)
-	err = SendTCPConnections(addr, timeBetSend, bytesToSend, timesToSend, maxRandTime)
+	err = SendTCPConnections(addr, nodeName, timeBetSend, bytesToSend, timesToSend, maxRandTime)
 	assert.Nil(t, err)
 }
 
@@ -142,7 +147,7 @@ func TestMultiLargePacketsSeqConn(t *testing.T) {
 // A different port are used each time a package is sent
 func TestMultiLargePacketsConcConn(t *testing.T) {
 	addr := "0.0.0.0:9994"
-	s, err := net.Listen("tcp4", addr)
+	s, err := net.Listen("tcp", addr)
 
 	assert.Nil(t, err)
 	defer s.Close()
@@ -152,13 +157,14 @@ func TestMultiLargePacketsConcConn(t *testing.T) {
 	timesToSend := 5
 	maxRandTime := 0.05
 	numConnections := 3
+	nodeName := "TestMultiLargePacketsConcConn"
 
 	go DealWithTCPConnections(s)
 
 	ch := make(chan bool)
 	defer close(ch)
 	for i := 0; i < numConnections; i++ {
-		go makeConnection(t, ch, addr, timeBetSend, bytesToSend, timesToSend, maxRandTime)
+		go makeConnection(t, ch, addr, nodeName, timeBetSend, bytesToSend, timesToSend, maxRandTime)
 	}
 
 	for i := 0; i < numConnections; i++ {
@@ -169,7 +175,7 @@ func TestMultiLargePacketsConcConn(t *testing.T) {
 // TestInvalidConn uses an invalid address which the client tries to dial and checks that errors are returned as expected
 func TestInvalidConn(t *testing.T) {
 	addr := "0.0.0.0:9993"
-	s, err := net.Listen("tcp4", addr)
+	s, err := net.Listen("tcp", addr)
 
 	assert.Nil(t, err)
 	defer s.Close()
@@ -178,8 +184,9 @@ func TestInvalidConn(t *testing.T) {
 	bytesToSend := 10000
 	timesToSend := 1
 	maxRandTime := 0.001
+	nodeName := "TestInvalidConn"
 
 	go DealWithTCPConnections(s)
-	err = SendTCPConnections("some_string", timeBetSend, bytesToSend, timesToSend, maxRandTime)
+	err = SendTCPConnections("some_string", nodeName, timeBetSend, bytesToSend, timesToSend, maxRandTime)
 	assert.NotNil(t, err)
 }
