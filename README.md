@@ -2,6 +2,9 @@
 Connection testing tool
 
 **This is in very early alpha, that's why the "versioning" is the commit hash used to generate the image**
+## Image location
+Images can be found at thoughtmachine/conntest:$COMMIT
+https://hub.docker.com/r/thoughtmachine/conntest
 
 ## What is conntest?
 Currently most networking testing tools focus on throughput, and the related packetloss (iPerf3 for example.) We discovered that what we really needed for our kubernetes clusters was a tool that would send low amounts of traffic, report on the path MTU (PMTU) and round time trip (RTT) time. This and some other metrics can be scraped by prometheus and used to build dashboards showing that all nodes can talk to each other, and that there are no underlying connectivity issues.
