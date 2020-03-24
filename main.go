@@ -30,7 +30,7 @@ var opts struct {
 	DNSRetryInterval float64 `long:"DNS_retry_interval" default:"5.0" description:"Time between attempts to re-discover SRV records"`
 	MaxDNSRetries    int     `long:"max_DNS_retries" default:"-1" description:"Maximum number of retries when attmpting to re-discover SRV records, use -1 for infinite retries"`
 	PromPort         string  `long:"prom_port" default:"9990" description:"Port to host prometheus metrics on"`
-	NodeName         string  `long: "nodename" default:"None" description:"If None, uses NODE_NAME from environment for its node name, otherwise uses this argument"`
+	NodeName         string  `long:"nodename" default:"None" description:"If None, uses NODE_NAME from environment for its node name, otherwise uses this argument"`
 }
 
 func init() {
